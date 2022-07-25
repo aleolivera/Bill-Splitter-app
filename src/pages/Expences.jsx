@@ -70,7 +70,7 @@ function Expences(){
             setFriends(updatedFriends);
             
             localStorage.setItem("friends",JSON.stringify(updatedFriends));
-            setMessage({variant:'success',text:'Expences added successfully'});
+            setMessage({variant:'success',text:'Expence added successfully'});
         }
         else
             setMessage({variant:'warning',text:messageText});

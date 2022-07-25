@@ -30,25 +30,25 @@ function Index(){
                 }
             ];
             setFriends(currentFriends);
-            setMessage({variant:'success',text:'Amigo ingresado'});
+            setMessage({variant:'success',text:'Friend added'});
             setAdded("");
             localStorage.setItem("friends",JSON.stringify(currentFriends));
         }
         else{
             setAdded("");
-            setMessage({variant:'warning',text:'Ese amigo ya se encuentra ingresado'});
+            setMessage({variant:'warning',text:'Friend already on the list'});
         }
     }
     const handleDelete=(e)=>{
         const currentFriends = friends.filter(f=>f.name!==e.target.value);
         setFriends(currentFriends);
-        setMessage({variant:'danger',text:'Se ha eliminado a '+e.target.value});
+        setMessage({variant:'danger',text:'Friend '+e.target.value+' deleted'});
         localStorage.setItem("friends",JSON.stringify(currentFriends));
     }
     const handleClean=(e)=>{
         setFriends([]);
         localStorage.removeItem("friends");
-        setMessage({variant:'warning',text:'Se ha limpiado la lista'});
+        setMessage({variant:'warning',text:'List cleaned'});
     }
     return(
         <>
