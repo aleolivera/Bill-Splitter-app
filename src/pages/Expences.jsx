@@ -1,9 +1,11 @@
 import {React,useEffect,useState} from 'react';
 import {Link,useNavigate} from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
-import { Button,Row,Col,Table,Form } from 'react-bootstrap';
-import AlertCustom from '../components/AlertCustom';
+import { Button,Row,Col,Table } from 'react-bootstrap';
 import TableHead from '../components/TableHead';
+import {validateExpence,calculateTotalSpent} from '../resources/Util';
+import TableBodyExpences from '../components/TableBodyExpences';
+import TableFootExpences from '../components/TableFootExpences';
 
 function Expences(){
     const [friends,setFriends]=useState(()=>{
@@ -14,61 +16,44 @@ function Expences(){
             return JSON.parse(localStorage.getItem("friends"));
     });
     const [friendIndex,setFriendIndex]=useState(0);
-    //const [currentFriend,setCurrentFriend]= useState(friends[friendIndex]);
     const [description,setDescription]= useState("");
     const [price,setPrice]= useState("");
     const [quantity,setQuantity]= useState(1);
     const [message,setMessage]=useState(null);
     const navigate = useNavigate();
     let currentFriend = friends[friendIndex];
+    const [totalSpent,setTotalSpent]=useState(0);
     
-    const validateExpence= () =>{
-        const regexPrice= new RegExp('[0-9]');
-        let aux=currentFriend.expences.filter(item=>item.description==description);
-        if(aux!="")
-            return "The item '"+description+"' is already in this list";
-        else if(price<=0)
-            return "Price can not be 0 or less";
-        else if(!regexPrice.test(price.toString()))
-            return "Not a valid price";
-        else if(description=="")
-            return "Description can not be empty";
-        else if(quantity<=0)
-            return "Quantity can not be 0 or less";
-        else
-            return "";
-    }
-
     const handleChangeFriend=(e)=>{
         let i=friendIndex;
-        if(e.target.id=="btnNext")
-            //setCurrentFriend(friends[++i]);
+        if(e.target.id==="btnNext")
             currentFriend=friends[++i];
           
         else
-            //setCurrentFriend(friends[--i]);
             currentFriend=friends[--i];
         setFriendIndex(i);
+        setTotalSpent(0);
         setMessage(null);
     }
 
     const handleAdd=()=>{
-        let messageText=validateExpence();
-        if(messageText==""){
+        let messageText=validateExpence(currentFriend,description,price,quantity);
+        if(messageText===""){
+            const total=(price*quantity);
             const item = {
                 description:description,
                 quantity:quantity,
-                price:price
+                price:(total)
             }
             let friend=currentFriend;
             friend.expences.push(item);
-            //setCurrentFriend(friend);
             currentFriend=friend;
     
             let updatedFriends = friends;
             updatedFriends[friendIndex]=friend;
             setFriends(updatedFriends);
-            
+            setTotalSpent(Number(totalSpent)+total);
+
             localStorage.setItem("friends",JSON.stringify(updatedFriends));
             setMessage({variant:'success',text:'Expence added successfully'});
         }
@@ -81,17 +66,16 @@ function Expences(){
     }
 
     const handleDelete=(e)=>{
-        const updatedExpences=currentFriend.expences.filter(item=>item.description!=e.target.value);
+        const updatedExpences=currentFriend.expences.filter(item=>item.description!==e.target.value);
 
         let friend=currentFriend;
         friend.expences=updatedExpences;
         currentFriend=friend;
-        //setCurrentFriend(friend);
         
         let updatedFriends = friends;
         updatedFriends[friendIndex]=friend;
         setFriends(updatedFriends);
-
+        setTotalSpent(calculateTotalSpent(currentFriend));
         localStorage.setItem("friends",JSON.stringify(updatedFriends));
 
         setMessage({variant:'danger',text:'Deleted item '+e.target.value});
@@ -99,10 +83,12 @@ function Expences(){
 
     useEffect(
         () => {
-            if(friends.length==0)
+            if(friends.length===0)
                 navigate("/");
+            console.log("useEffect");
+            setTotalSpent(calculateTotalSpent(currentFriend));
         },
-        [],
+        [friends,navigate,currentFriend],
       );
 
     if(friends.length>0){
@@ -118,47 +104,16 @@ function Expences(){
                     <Col>
                         <Table responsive="sm">
                             <TableHead columns={['Nº','Description','Quantity','Price','Action']} align='center'/>
-                            <tbody>
-                                <tr>
-                                    <th>#</th>
-                                    <td style={{textAlign:'center'}}>
-                                        <Form.Control type='text'className='mb-3' id="txtDescription" placeholder='Description' value={description} onChange={(e)=>setDescription(e.target.value)} />
-                                    </td>
-                                    <td style={{textAlign:'center'}}>
-                                        <Form.Control type='number' id="txtQuantity" placeholder='Quantity' min="1" max='99' value={quantity} onChange={(e)=>setQuantity(e.target.value)} />
-                                    </td>
-                                    <td style={{textAlign:'center'}}>
-                                        <Form.Control type='text' id="txtPrice" placeholder='Price' value={price} onChange={(e)=>setPrice(e.target.value)} />
-                                    </td>
-                                    <td style={{textAlign:'center'}}>
-                                        <Button id="btnAdd" variant="outline-primary" onClick={handleAdd}>Add</Button>
-                                    </td>
-                                </tr>
-                                {
-                                    message!=null &&
-                                    <tr>
-                                        <td colSpan={5}>
-                                            <AlertCustom customKey={0} variant={message.variant} text={message.text} />
-                                        </td>
-                                    </tr>
-                                }
-                                {
+                            <TableBodyExpences description={description} quantity={quantity} price={price} 
+                            onChangeDescription={(e)=>setDescription(e.target.value)} 
+                            onChangeQuantity={(e)=>setQuantity(e.target.value)}
+                            onChangePrice={(e)=>setPrice(e.target.value)} 
+                            handleAdd={handleAdd} handleDelete={handleDelete} 
+                            message={message} currentFriend={currentFriend}/>
+                            {
                                     (currentFriend.expences.length>0) &&
-                                        currentFriend.expences.map((item,i)=>(
-                                            <tr key={i}>
-                                                <th><p className="lead"><b>{i+1}</b></p></th>
-                                                <td style={{textAlign:'center'}}><p className="lead">{item.description}</p></td>
-                                                <td style={{textAlign:'center'}}><p className="lead">{item.quantity}</p></td>
-                                                <td style={{textAlign:'center'}}><p className="lead">${item.price}-.</p></td>
-                                                <td>
-                                                    <Button variant="outline-danger" id='btnDelete' value={item.description} onClick={handleDelete}>
-                                                        Delete
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                }
-                            </tbody>
+                                    <TableFootExpences totalSpent={totalSpent}/>
+                            }
                         </Table>
                     </Col>
                 </Row>
@@ -168,7 +123,7 @@ function Expences(){
                         <Col><Button variant='btn btn-outline-success' id="btnBack" onClick={handleChangeFriend}>Back</Button></Col>
                     }  
                     {
-                        (friendIndex==0) &&
+                        (friendIndex===0) &&
                         <Col><Link className='btn btn-outline-secondary' to='/' id="btnIndex" >Back</Link></Col>
                     }  
                     {
@@ -178,7 +133,7 @@ function Expences(){
                         </Col>
                     }
                     {
-                        (friends.length == friendIndex+1) &&
+                        (friends.length === friendIndex+1) &&
                         <Col style={{textAlign:'end'}}>
                             <Link className='btn btn-outline-primary' to='/bill' id="btnCalculate" >Calculate</Link>
                         </Col>
@@ -186,11 +141,6 @@ function Expences(){
                 </Row>
             </>
         );
-    }
-    else{
-        return(
-            <h1>Rompio</h1>
-        )
     }
 }
 export default Expences;

@@ -3,29 +3,40 @@ import {Link, useNavigate} from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
 import {Row,Col,Table,Button} from 'react-bootstrap';
 import TableHead from '../components/TableHead';
+import TableBodyBill from '../components/TableBodyBill';
+import TableFootBill from '../components/TableFootBill';
 
 function Bill(){
-    
-    const [friends,setFriends]=useState(JSON.parse(localStorage.getItem('friends')));
-    const [friendsOnTable,setFriendsOnTable]=useState(()=>{
+    const [friends]=useState(()=>{
+        let f=JSON.parse(localStorage.getItem("friends"));
+        if(f==null)
+            return [];
+        else
+            return JSON.parse(localStorage.getItem("friends"));
+    });
+    const [friendsOnTable]=useState(()=>{
         let friendsOnTable=[];
-        friends.map(friend => {
-            let sum=0;
-            friend.expences.forEach((expence)=>{
-                sum+=Number.parseFloat(expence.price);
-            })
-            friendsOnTable.push(
-                {
-                    name:friend.name,
-                    total:sum
-                }
-            );
-        });
+        if(friends){
+            friends.forEach(friend => {
+                let sum=0;
+                friend.expences.forEach((expence)=>{
+                    sum+=Number.parseFloat(expence.price);
+                })
+                friendsOnTable.push(
+                    {
+                        name:friend.name,
+                        total:sum
+                    }
+                );
+            });
+        }
+        else
+            friendsOnTable=[];
         return friendsOnTable;
     });
-    const[totalSpent,setTotalSpent]= useState(()=>{
+    const[totalSpent]= useState(()=>{
         let sum=0;
-        friendsOnTable.map((friend) => {
+        friendsOnTable.forEach((friend) => {
             sum+=friend.total;
         })
         return sum;
@@ -41,10 +52,10 @@ function Bill(){
 
     useEffect(
         ()=>{
-            if(friends.length==0)
+            if(friends.length===0)
                 navigate("/");
         },
-        []
+        [friends,navigate]
     );
     
     if(friends.length>0){  
@@ -56,51 +67,8 @@ function Bill(){
                 <Row className="mt-2">
                     <Table>
                         <TableHead columns={['#','Friend','Spent','Has to','This much']} align='center'></TableHead>
-                        <tbody>
-                            {friendsOnTable.map((f,i)=>(
-                                <>
-                                    {
-                                        (f.total>cutPerFriend) &&
-                                        <tr key={i} style={{textAlign:'center'}} className='table-success'>
-                                            <th><p className="lead"><b>{i+1}</b></p></th>
-                                            <td><p className="lead">{f.name}</p></td>
-                                            <td><p className="lead">${f.total}-.</p></td>
-                                            <td><p className="lead">Take</p></td>
-                                            <td><p className="lead">${(f.total-cutPerFriend).toFixed(2)}-.</p></td>
-                                        </tr>
-                                    }
-                                
-                                    {
-                                        (f.total<cutPerFriend) &&
-                                        <tr key={i} style={{textAlign:'center'}} className='table-danger'>
-                                            <th><p className="lead"><b>{i+1}</b></p></th>
-                                            <td><p className="lead">{f.name}</p></td>
-                                            <td><p className="lead">${f.total}-.</p></td>
-                                            <td><p className="lead">Give</p></td>
-                                            <td><p className="lead">${(cutPerFriend-f.total).toFixed(2)}-.</p></td>
-                                        </tr>
-                                    }
-
-                                    {
-                                        (f.total==cutPerFriend) &&
-                                        <tr key={i} style={{textAlign:'center'}} className='table-secondary'>
-                                            <th><p className="lead"><b>{i+1}</b></p></th>
-                                            <td><p className="lead">{f.name}</p></td>
-                                            <td><p className="lead">${f.total}-.</p></td>
-                                            <td><p className="lead">Do Nothing</p></td>
-                                            <td><p className="lead"> - </p></td>
-                                        </tr>
-                                    }
-                                </>    
-                                
-                            ))}
-                        </tbody>
-                        <tfoot>
-                            <tr style={{textAlign:'center'}}>
-                                <th colSpan={3}><p className="lead" style={{fontSize:'150%'}}><b>Total Spent: ${totalSpent.toFixed(2)}-.</b></p></th>
-                                <th colSpan={2}><p className="lead" style={{fontSize:'150%'}}><b>Each's Cut: ${cutPerFriend.toFixed(2)}-.</b></p></th>
-                            </tr>
-                        </tfoot>
+                        <TableBodyBill data={friendsOnTable} cutPerFriend={cutPerFriend} />
+                        <TableFootBill totalSpent={totalSpent} cutPerFriend={cutPerFriend}/>
                     </Table>
                 </Row>
                 <Row className="mt-3"> 
@@ -109,11 +77,6 @@ function Bill(){
                 </Row>
             
             </>
-        );
-    }
-    else{
-        return(
-            <h1>Rompio</h1>
         );
     }
 }

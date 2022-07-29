@@ -18,9 +18,8 @@ function Index(){
     const [message,setMessage]=useState(null);
 
     const handleAdd=()=>{
-        let aux="";
-        aux=friends.filter(f=>f.name==added);
-        if(aux==""){
+        let aux=friends.filter(f=>f.name.toLowerCase()===added.toLowerCase());
+        if(aux.length===0){
             let currentFriends = [];
             currentFriends=[
                 ...friends,
