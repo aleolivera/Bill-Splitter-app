@@ -61,8 +61,8 @@ function Expences(){
             setMessage({variant:'warning',text:messageText});
 
         setDescription("");
-        setPrice(0.0);
-        setQuantity(0);
+        setPrice("");
+        setQuantity(1);
     }
 
     const handleDelete=(e)=>{

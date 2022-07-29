@@ -13,7 +13,7 @@ function FormRowExpences(props){
                 <Form.Control type='number' id="txtQuantity" placeholder='Quantity' min="1" max='99' value={quantity} onChange={onChangeQuantity} />
             </td>
             <td style={{textAlign:'center'}}>
-                <Form.Control type='text' id="txtPrice" placeholder='Price' value={price} onChange={onChangePrice} />
+                <Form.Control type='number' id="txtPrice" placeholder='Price' value={price} onChange={onChangePrice} />
             </td>
             <td style={{textAlign:'center'}}>
                 <Button id="btnAdd" variant="outline-primary" onClick={handleAdd}>Add</Button>
