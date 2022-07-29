@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Bill-Splitter-app/static/css/main.fa95dbb9.css",
+    "main.js": "/Bill-Splitter-app/static/js/main.b3e969aa.js",
+    "static/js/787.618f276b.chunk.js": "/Bill-Splitter-app/static/js/787.618f276b.chunk.js",
+    "index.html": "/Bill-Splitter-app/index.html",
+    "main.fa95dbb9.css.map": "/Bill-Splitter-app/static/css/main.fa95dbb9.css.map",
+    "main.b3e969aa.js.map": "/Bill-Splitter-app/static/js/main.b3e969aa.js.map",
+    "787.618f276b.chunk.js.map": "/Bill-Splitter-app/static/js/787.618f276b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fa95dbb9.css",
+    "static/js/main.b3e969aa.js"
+  ]
+}
